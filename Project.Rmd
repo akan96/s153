@@ -1,0 +1,29 @@
+---
+title: "MT 2 Project"
+author: "Avery Kan"
+date: "April 6, 2017"
+output: html_document
+---
+
+Due April 18, 2017
+
+```{r setup, include=FALSE}
+library(DataComputing)
+```
+
+```{r}
+
+q1 <- read_csv("q1_train.csv")
+q2 <- read_csv("q2_train.csv")
+q3 <- read_csv("q3_train.csv")
+q4 <- read_csv("q4_train.csv")
+q5 <- read_csv("q5_train.csv")
+
+```
+
+
+```{r}
+par(mfrow= c(5,1))
+plot(q1,q2,q3,q4,q5, type= "l")
+```
+
