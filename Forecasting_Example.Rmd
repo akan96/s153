@@ -7,7 +7,7 @@ output: html_document
 
 Load in data as a time series object
 ```{r}
-ts <- ts(unlist(read.csv("~/Desktop/Stat153_Sp17/dataset.csv", as.is = TRUE)))
+ts <- ts(unlist(read.csv("dataset.csv", as.is = TRUE)))
 ```
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Q1"
+title: "Q2"
 author: "Avery Kan"
 date: "9 Apr 2017"
 output: 
@@ -18,9 +18,11 @@ includeSourceDocuments()
 ```
 <!-- Don't edit the material above this line -->
 ```{r}
-ts <- ts(unlist(read.csv("~/Desktop/Stat153_Sp17/dataset.csv", as.is = TRUE)))
+ts2 <- ts(unlist(read.csv("q2_train.csv", as.is = TRUE)))
 
+## Exploratory Data Analysis
+
+plot(ts2, type = 'l')
 ```
 
-
-Delete this sentence and start entering your text here.
+What do you notice? Are any transformations needed?
