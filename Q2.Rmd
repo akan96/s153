@@ -32,11 +32,24 @@ plot(ts2, type = 'l')
 What do you notice? Are any transformations needed?
 
 ```{r}
-ts2 = ts2 + abs(min(ts2))
+ts2 = ts2 + abs(min(ts2)+.01)
 ts2.ln <- log(ts2)
-ts2.d <- diff(ts2.ln)
-acf(ts2.d, lag.max = 20)
+ts2.sq <- sqrt(ts2)
 
+t = 1: length(ts2)
+
+lm.ts2 <- lm(ts2~t+I(t^2)+I(t^3))
+ts2.lm <- ts2 - lm.ts2$fitted.values
+
+
+ts2.d <- diff(ts2.ln)
+acf(ts2.d, lag.max = 100)
+pacf(ts2.d, lag.max = 100)
+
+fil <- c(0.5/104, rep(1/104,103),0.5/104)
+filter(ts2,fil)
+plot(t, ts2, type = "l")
+points(t, fil, type = "l", col = "red")
 ```
 
 
@@ -45,7 +58,6 @@ acf(ts2.d, lag.max = 20)
 Parametric fitting
 
 ```{r}
-t = 1: length(ts2)
 f1 = 1
 f2 = 2
 f3 = 3
