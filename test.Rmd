@@ -1,0 +1,24 @@
+---
+title: "test"
+author: "Xuyu Zhang"
+date: "4/9/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+q1 <- read.csv("/Users/Joyce/Desktop/s153/q1_train.csv")
+plot(q1)
+q2 <- read.csv("/Users/Joyce/Desktop/s153/q2_train.csv")
+plot(q2)
+q3 <- read.csv("/Users/Joyce/Desktop/s153/q3_train.csv")
+plot(q3)
+q4 <- read.csv("/Users/Joyce/Desktop/s153/q4_train.csv")
+plot(q4)
+q5 <- read.csv("/Users/Joyce/Desktop/s153/q5_train.csv")
+plot(q5)
+```
+
