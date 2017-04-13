@@ -51,11 +51,34 @@ q1.m3.r = q1 - (7.73*0.1 -2.098*10^(-3)*t1 +1.375*10^(-5)*t2 -1.323*10^(-8)*t3)
 plot(q1.m3.r)
 #no big difference, not helping
 
+#fit a sinusoid
+t = 1: length(q1.sq)
+f1 = 1
+f2 = 2
+f3 = 3
+d = 52
+v1 = cos(2*pi*f1*t/d)
+v2 = sin(2*pi*f1*t/d)
+v3 = cos(2*pi*f2*t/d)
+v4 = sin(2*pi*f2*t/d)
+v5 = cos(2*pi*f3*t/d)
+v6 = sin(2*pi*f3*t/d)
+q1.si = lm(q1.sq ~ v1 + v2 + v3 + v4 +v5 + v6)
+plot(t, q1.si$residuals)
+plot(q1.sq)
+points(t, q1.si.3$fitted.values, type = "l", col = "red")
+
 #diff
 q1.df = diff(q1.sq)
 plot(q1.df)
-acf(q1.df)
-pacf(q1.df)
+acf(q1.df, lag.max = 300)
+#seasonal difference at d around 50
+q1.sdf = diff(q1.df1, 50)
+plot(q1.sdf)
+acf(q1.sdf, lag.max = 300)
+
+#trial
+
 
 check_diff <- function(dt,a,b) {
   for (i in a:b) {
@@ -66,11 +89,11 @@ check_diff <- function(dt,a,b) {
   }
 }
 
-check_diff(q1.df,52,53)
 ```
 
 ```{r}
 #4.Fit ARMA model to residuals.
+
 ```
 
 ```{r}
