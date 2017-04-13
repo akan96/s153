@@ -67,30 +67,6 @@ ts.2.res <- ts2.res- lin.mod$fitted.values
 
 
 
-Parametric fitting
-
-```{r}
-f1 = 1
-f2 = 2
-f3 = 3
-d = 18
-v1 = cos(2*pi*f1*t/d)
-v2 = sin(2*pi*f1*t/d)
-v3 = cos(2*pi*f2*t/d)
-v4 = sin(2*pi*f2*t/d)
-v5 = cos(2*pi*f3*t/d)
-v6 = sin(2*pi*f3*t/d)
-lin.mod = lm(ts2 ~ v1 + v2 + v3 + v4 + v5 + v6)
-t = 1: length(ts2); tt = t^2 ; t3 = t^3
-cub.model = lm(lin.mod$residuals ~ 1 + t + tt + t^3)
-plot(t, lin.mod$residuals, type = "o", xlab = "Weekly Time", ylab = "ts2",main = "Trend Fit")
-points(t, quad.model$fitted, type = "l", col = "red")
-plot(t, ts2, type = "o", xlab = "Weekly Time", ylab = "ts2", main = "Trend and Seasonality")
-points(t, cub.model$fitted + lin.mod$fitted, type = "l", col = "red")
-
-```
-
-
 ## Model Fitting 
 
 ```{r}
@@ -136,13 +112,6 @@ mse(c(1,1,6),c(0,0,0))
 full.arima <- arima(ts.2.res, order = v11)
 
 ```
-
-Looking at the last period, which model is best?
-Looking instead at periods 1 and 2, which model is best?
-
-We choose model 1 for its simplicity. 
-
-Also, not included here, but you may also want to consider removing outliers before fitting your final model.
 
 ---
 
