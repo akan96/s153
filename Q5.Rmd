@@ -1,0 +1,190 @@
+---
+title: "Q5"
+author: "Avery Kan"
+date: "April 12, 2017"
+output: html_document
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+
+```{r}
+ts5 <- read.csv("q5_train.csv", as.is = TRUE)
+ts5 <- ts(ts5[,2])
+## Exploratory Data Analysis
+plot(ts5, type = "l")
+```
+
+
+```{r}
+ts5 = ts5 + abs(min(ts5)) + .01
+ts5 <- sqrt(ts5)
+
+t = 1: length(ts5)
+
+lm.ts5 <- lm(ts5~t+I(t^2))
+plot(t, ts5, type = "l")
+points(t, lm.ts5$fitted.values, type = "l", col = "red")
+
+ts5.lm <- ts5 - lm.ts5$fitted.values
+
+
+ts5.d<- diff(ts5.lm,1)
+ts5.dd <- diff(ts5.d,26)
+acf(ts5.d,lag.max= 100)
+acf(ts5.dd, lag.max = 100)
+pacf(ts5.d, lag.max = 100)
+pacf(ts5.dd, lag.max = 100)
+
+
+f1 = 1
+f2 = 2
+f3 = 3
+d = 26
+v1 = cos(2*pi*f1*t/d)
+v2 = sin(2*pi*f1*t/d)
+v3 = cos(2*pi*f2*t/d)
+v4 = sin(2*pi*f2*t/d)
+v5 = cos(2*pi*f3*t/d)
+v6 = sin(2*pi*f3*t/d)
+lin.mod = lm(ts5.lm ~ v1 + v2 + v3 + v4 + v5 + v6)
+plot(t, ts5.lm, type = "l")
+points(t, lin.mod$fitted.values, type = "l", col = "red")
+
+ts5.sin <- ts5.lm- lin.mod$fitted.values
+plot(ts5.sin)
+acf(diff(ts5.sin),la)
+
+d2= 52*6
+V1 = cos(2*pi*f1*t/d2)
+V2 = sin(2*pi*f1*t/d2)
+lin.mod2 = lm(ts5.sin ~ V1+V2)
+plot(t, ts5.sin, type = "l")
+points(t, lin.mod2$fitted.values, type = "l", col = "red")
+
+
+
+```
+
+
+
+
+Parametric fitting
+
+```{r}
+f1 = 1
+f2 = 2
+f3 = 3
+d = 18
+v1 = cos(2*pi*f1*t/d)
+v2 = sin(2*pi*f1*t/d)
+v3 = cos(2*pi*f2*t/d)
+v4 = sin(2*pi*f2*t/d)
+v5 = cos(2*pi*f3*t/d)
+v6 = sin(2*pi*f3*t/d)
+lin.mod = lm(ts2 ~ v1 + v2 + v3 + v4 + v5 + v6)
+t = 1: length(ts2); tt = t^2 ; t3 = t^3
+cub.model = lm(lin.mod$residuals ~ 1 + t + tt + t^3)
+plot(t, lin.mod$residuals, type = "o", xlab = "Weekly Time", ylab = "ts2",main = "Trend Fit")
+points(t, quad.model$fitted, type = "l", col = "red")
+plot(t, ts2, type = "o", xlab = "Weekly Time", ylab = "ts2", main = "Trend and Seasonality")
+points(t, cub.model$fitted + lin.mod$fitted, type = "l", col = "red")
+
+```
+
+
+## Model Fitting 
+
+```{r}
+ts2.m1 <- arima(ts.log, order = c(0, 1, 1), seasonal = list(order = c(0, 1, 1), period = 52))
+m1
+tsdiag(m1)
+```
+
+---
+
+## Cross Validation
+
+Another method of model diagnostics is cross-validation. We break up the data into two parts: the train dataset and the test dataset. We fit models to the train dataset, and check whether it's a good model by computing the MSE of predictions for the test dataset. 
+
+We write a function to carry out cross-validation and calculate MSE of predictions for your test dataset. Here, for each model, we find the MSE of prediction for the last five periods of the dataset. 
+
+```{r}
+mse <- function(v1,v2,tsd,n){
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 30))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)){
+    n1 <- n1list[i]
+    train <- tsd[1:n1]
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
+}
+
+v10 <- c(1,0,0)
+v01 <- c(0,0,1)
+v11 <- c(1,0,1)
+mse (v10,c(0,0,0),ts.2.res,length(ts.2.res)) 
+mse (v01,c(0,0,0),ts.2.res,length(ts.2.res))
+mse (v11,c(0,0,0),ts.2.res,length(ts.2.res))##
+mse(c(1,1,1),c(0,0,0),ts.2.res,length(ts.2.res))
+mse(c(1,1,6),c(0,0,0))
+full.arima <- arima(ts.2.res, order = v11)
+
+```
+
+## Forecasting
+
+```{r}
+predictions <- predict(m1, n.ahead = 104)$pred
+```
+
+We can plot our predictions to see if they make sense.
+
+```{r}
+plot(1:(length(ts) + length(predictions)), c(ts, predictions), type = 'l', col = 1)
+points((length(ts) + 1) : (length(ts) + length(predictions)), 
+       predictions, type = 'l', col = 2)
+```
+
+What did we forget?
+
+```{r}
+predictions <- exp(predict(m1, n.ahead = 104)$pred)
+plot(1:(length(ts) + length(predictions)), c(ts, predictions), type = 'l', col = 1)
+points((length(ts) + 1) : (length(ts) + length(predictions)), predictions, type = 'l', col = 2)
+```
+
+
+---
+
+## Creating the Submission File
+
+```{r}
+write.table(predictions,
+            sep = ",",
+            col.names = FALSE,
+            row.names = FALSE,
+            file = "Example_Firstname_Lastname_StudentIDNumber.txt")
+
+```
+
+This should save the file to your local directory. As a check to make sure it works, we can read in the file and plot the points to make sure it is what we expected.
+
+```{r}
+temp <- read.table("Example_Firstname_Lastname_StudentIDNumber.txt", sep = ",")
+plot(as.numeric(unlist(temp)))
+```
+
+
