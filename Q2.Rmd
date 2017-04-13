@@ -35,7 +35,7 @@ What do you notice? Are any transformations needed?
 ts2 = ts2 + abs(min(ts2)+.01)
 ts2.ln <- log(ts2)
 ts2.sq <- sqrt(ts2)
-
+ts2 <- ts2.ln
 t = 1: length(ts2)
 
 lm.ts2 <- lm(ts2~t+I(t^2)+I(t^3))

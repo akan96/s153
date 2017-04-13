@@ -19,26 +19,22 @@ includeSourceDocuments()
 <!-- Don't edit the material above this line -->
 
 ```{r}
-ts1 <- read.csv("q1_train.csv", as.is = TRUE)
-ts1 <- ts(ts1[,2])
-ts2 <- read.csv("q2_train.csv", as.is = TRUE)
-ts2 <- ts(ts2[,2])
-
+ts4 <- read.csv("q4_train.csv", as.is = TRUE)
+ts4 <- ts(ts4[,2])
 ## Exploratory Data Analysis
-plot(ts1, type = "l")
-plot(ts2, type = 'l')
+plot(ts4, type = "l")
 ```
 
 What do you notice? Are any transformations needed?
 
 ```{r}
-ts2 = ts2 + abs(min(ts2)+.01)
-ts2.ln <- log(ts2)
-ts2.sq <- sqrt(ts2)
+ts4 = ts4 + abs(min(ts4)) + .02
+ts4.ln <- log(ts4)
+ts4.sq <- sqrt(ts4)
 
-t = 1: length(ts2)
+t = 1: length(ts4)
 
-lm.ts2 <- lm(ts2~t+I(t^2)+I(t^3))
+lm.ts4 <- lm(ts4.ln~t+I(t^2))
 ts2.lm <- ts2 - lm.ts2$fitted.values
 
 
@@ -135,15 +131,6 @@ full.arima <- arima(ts.2.res, order = v11)
 
 ```
 
-Looking at the last period, which model is best?
-Looking instead at periods 1 and 2, which model is best?
-
-We choose model 1 for its simplicity. 
-
-Also, not included here, but you may also want to consider removing outliers before fitting your final model.
-
----
-
 ## Forecasting
 
 ```{r}
@@ -157,7 +144,6 @@ plot(1:(length(ts) + length(predictions)), c(ts, predictions), type = 'l', col =
 points((length(ts) + 1) : (length(ts) + length(predictions)), 
        predictions, type = 'l', col = 2)
 ```
-
 
 What did we forget?
 
