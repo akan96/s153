@@ -78,7 +78,9 @@ plot(q1.sdf)
 acf(q1.sdf, lag.max = 300)
 
 #trial
-
+a = diff(q1.sdf, 50)
+plot(a)
+acf(a, lag.max = 300)
 
 check_diff <- function(dt,a,b) {
   for (i in a:b) {
