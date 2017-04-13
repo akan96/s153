@@ -46,10 +46,22 @@ ts2.d <- diff(ts2.ln)
 acf(ts2.d, lag.max = 100)
 pacf(ts2.d, lag.max = 100)
 
-fil <- c(0.5/104, rep(1/104,103),0.5/104)
-filter(ts2,fil)
+para <- c(0.5/104, rep(1/104,103),0.5/104)
+fil <- stats::filter(ts2,para)
 plot(t, ts2, type = "l")
 points(t, fil, type = "l", col = "red")
+
+ts.2 <- ts2[53:473]
+ts2.res <- ts.2-fil[53:473]
+ts2.res %>% plot()
+
+t.2 <- 1:length(ts.2)
+f1 = 1
+d = 52
+v1 = cos(2*pi*f1*t.2/d)
+v2 = sin(2*pi*f1*t.2/d)
+lin.mod = lm(ts2.res ~ v1 + v2)
+ts.2.res <- ts2.res- lin.mod$fitted.values
 ```
 
 
@@ -77,14 +89,6 @@ plot(t, ts2, type = "o", xlab = "Weekly Time", ylab = "ts2", main = "Trend and S
 points(t, cub.model$fitted + lin.mod$fitted, type = "l", col = "red")
 
 ```
-
-acf, pacf
-
-```{r}
-acf(ts2.d)
-pacf(ts2.d)
-```
-
 
 
 ## Model Fitting 
@@ -174,26 +178,31 @@ Another method of model diagnostics is cross-validation. We break up the data in
 We write a function to carry out cross-validation and calculate MSE of predictions for your test dataset. Here, for each model, we find the MSE of prediction for the last five periods of the dataset. 
 
 ```{r}
-computeCVmse <- function(order.totry, seasorder.totry){
-
+mse <- function(v1,v2,tsd,n){
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 30))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)){
+    n1 <- n1list[i]
+    train <- tsd[1:n1]
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
 }
-```
 
+v10 <- c(1,0,0)
+v01 <- c(0,0,1)
+v11 <- c(1,0,1)
+mse (v10,c(0,0,0),ts.2.res,length(ts.2.res)) 
+mse (v01,c(0,0,0),ts.2.res,length(ts.2.res))
+mse (v11,c(0,0,0),ts.2.res,length(ts.2.res))##
+mse(c(1,1,1),c(0,0,0),ts.2.res,length(ts.2.res))
+mse(c(1,1,6),c(0,0,0))
+full.arima <- arima(ts.2.res, order = v11)
 
-We can use this function to compute the MSEs for our 5 models.
-
-```{r}
-MSE1 <- computeCVmse(c(0, 1, 1), c(0,1,1))
-MSE2 <- computeCVmse(c(0, 1, 2), c(0,1,1))
-MSE3 <- computeCVmse(c(0, 1, 3), c(0,1,1))
-MSE4 <- computeCVmse(c(0, 1, 4), c(0,1,1))
-MSE5 <- computeCVmse(c(0, 1, 5), c(0,1,1))
-
-MSE1
-MSE2
-MSE3
-MSE4
-MSE5
 ```
 
 Looking at the last period, which model is best?
