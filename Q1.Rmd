@@ -1,0 +1,83 @@
+---
+title: "Q1"
+author: "Xuyu Zhang"
+date: "4/12/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+q1 <- read.csv("q1_train.csv")
+q1 <- ts(q1[,2])
+
+#1.Exploratory data analysis
+plot(q1)
+```
+
+```{r}
+#2.Transform data: variance stabilization
+#increasing variance indicates that log transformation is necessary
+q1 = q1 + abs(min(q1))
+q1.ln = log(q1)
+plot(q1.ln)
+q1.sq = sqrt(q1)
+plot(q1.sq)
+#square is absolutely better
+```
+
+```{r}
+#3.Remove mean structure (parametric model, smoothing, differencing)
+#figure out a slightly increasing trend, try linear model, quadratic model and polynomial
+t1 = 1:length(q1.sq)
+t2 = t1^2
+t3 = t1^3
+q1.m1 = lm(q1.sq ~ t1)
+q1.m1
+q1.m2 = lm(q1.sq ~ t1 + t2)
+q1.m2
+q1.m3 = lm(q1.sq ~ t1 + t2 + t3)
+q1.m3
+summary(q1.m1)
+summary(q1.m2)
+summary(q1.m3)
+q1.m1.r = q1 - (5.232*10^(-1)+1.842*10^(-3)*t1)
+plot(q1.m1.r)
+q1.m2.r = q1 - (6.762*0.1 + 1.001*10^(-4)*t1 + 3.311*10^(-6)*t2)
+plot(q1.m2.r)
+q1.m3.r = q1 - (7.73*0.1 -2.098*10^(-3)*t1 +1.375*10^(-5)*t2 -1.323*10^(-8)*t3)
+plot(q1.m3.r)
+#no big difference, not helping
+
+#diff
+q1.df = diff(q1.sq)
+plot(q1.df)
+acf(q1.df)
+pacf(q1.df)
+
+check_diff <- function(dt,a,b) {
+  for (i in a:b) {
+    df <- diff(dt, i)
+    plot(df)
+    acf(df)
+    pacf(df)
+  }
+}
+
+check_diff(q1.df,52,53)
+```
+
+```{r}
+#4.Fit ARMA model to residuals.
+```
+
+```{r}
+#5.Check if model fit is good. (Diagnostics)
+```
+
+```{r}
+#6.Forecast
+```
+
