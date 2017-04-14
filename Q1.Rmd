@@ -81,6 +81,19 @@ acf(q1.sdf, lag.max = 300)
 a = diff(q1.sdf, 50)
 plot(a)
 acf(a, lag.max = 300)
+b = diff(a, 50)
+plot(b)
+acf(b, lag.max = 300)
+c = diff(b, 50)
+plot(c)
+acf(c, lag.max = 300)
+d = diff(c, 50)
+plot(d)
+acf(d, lag.max = 300)
+e = diff(d, 50)
+plot(e)
+acf(e, lag.max = 300)
+
 
 check_diff <- function(dt,a,b) {
   for (i in a:b) {
