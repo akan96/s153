@@ -77,7 +77,7 @@ q1.sdf = diff(q1.df1, 50)
 plot(q1.sdf)
 acf(q1.sdf, lag.max = 300)
 
-#trial
+#trial, not necessary
 a = diff(q1.sdf, 50)
 plot(a)
 acf(a, lag.max = 300)
@@ -108,14 +108,19 @@ check_diff <- function(dt,a,b) {
 
 ```{r}
 #4.Fit ARMA model to residuals.
-
+#check acf and pacf
+acf(q1.sdf, lag.max = 300)$acf
+pacf(q1.sdf, lag.max = 300)
+#seems like ARMA(0,1) is a good choice
 ```
 
 ```{r}
 #5.Check if model fit is good. (Diagnostics)
+
 ```
 
 ```{r}
 #6.Forecast
+
 ```
 
