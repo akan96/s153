@@ -77,24 +77,6 @@ q1.sdf = diff(q1.df1, 50)
 plot(q1.sdf)
 acf(q1.sdf, lag.max = 300)
 
-#trial, not necessary
-a = diff(q1.sdf, 50)
-plot(a)
-acf(a, lag.max = 300)
-b = diff(a, 50)
-plot(b)
-acf(b, lag.max = 300)
-c = diff(b, 50)
-plot(c)
-acf(c, lag.max = 300)
-d = diff(c, 50)
-plot(d)
-acf(d, lag.max = 300)
-e = diff(d, 50)
-plot(e)
-acf(e, lag.max = 300)
-
-
 check_diff <- function(dt,a,b) {
   for (i in a:b) {
     df <- diff(dt, i)
@@ -112,15 +94,75 @@ check_diff <- function(dt,a,b) {
 acf(q1.sdf, lag.max = 300)$acf
 pacf(q1.sdf, lag.max = 300)
 #seems like ARMA(0,1) is a good choice
+#AMRA???0,1)
+q1.md01 <- arima(q1.sq, order = c(0,1,1), seasonal = list(order = c(0,1,1), period = 50))
+q1.md01 #aic = -358.58
+tsdiag(q1.md01)
+
+#ARMA(1,1)
+q1.md11 <- arima(q1.sq, order = c(1,1,1), seasonal = list(order = c(1,1,1), period = 50))
+q1.md11 #aic = -395.49
+tsdiag(q1.md11)
+
+#ARMA(0,2)
+q1.md02 <- arima(q1.sq, order = c(0,1,2), seasonal = list(order = c(0,1,2), period = 50))
+q1.md02 #aic = -382.31
+tsdiag(q1.md02)
+
+#ncreasing p or q does not make model better, "next more complex" test proves ARMA(0,1) is the best
 ```
 
 ```{r}
 #5.Check if model fit is good. (Diagnostics)
+#Cross validation
+mse <- function(v1,v2,tsd,n) {
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 30))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)) {
+    n1 <- n1list[i]
+    train <- tsd[1:n1] 
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
+}
+
+v10 <- c(1,0,0)
+v01 <- c(0,0,1)
+v11 <- c(1,0,1)
+v12 <- c(1,0,2)
+mse (v10,c(0,0,0),ts.2.res,length(ts.2.res))
+mse (v01,c(0,0,0),ts.2.res,length(ts.2.res))
+mse (v11,c(0,0,0),ts.2.res,length(ts.2.res))
+mse( v12, c(0,0,0), ts.2.res, length(ts.2.res))
+mse(c(1,1,1),c(0,0,0),ts.2.res,length(ts.2.res))
+mse(c(1,1,6),c(0,0,0))
+full.arima <- arima(ts.2.res, order = v11)
 
 ```
 
 ```{r}
 #6.Forecast
-
+predictions <- predict(, n.ahead = 104)$pred
 ```
+
+```{r}
+#Another model
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
