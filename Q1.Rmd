@@ -22,9 +22,9 @@ plot(q1)
 #increasing variance indicates that log transformation is necessary
 q1 = q1 + abs(min(q1))
 q1.ln = log(q1)
-plot(q1.ln)
+plot(q1.ln, main = "log(q1)")
 q1.sq = sqrt(q1)
-plot(q1.sq)
+plot(q1.sq, main = "sqrt(q1)")
 #square is absolutely better
 ```
 
@@ -44,11 +44,11 @@ summary(q1.m1)
 summary(q1.m2)
 summary(q1.m3)
 q1.m1.r = q1 - (5.232*10^(-1)+1.842*10^(-3)*t1)
-plot(q1.m1.r)
+plot(q1.m1.r, main = "residual of linear model", ylab = "residuals")
 q1.m2.r = q1 - (6.762*0.1 + 1.001*10^(-4)*t1 + 3.311*10^(-6)*t2)
-plot(q1.m2.r)
+plot(q1.m2.r, main = "residual of quadratic model", ylab = "residuals")
 q1.m3.r = q1 - (7.73*0.1 -2.098*10^(-3)*t1 +1.375*10^(-5)*t2 -1.323*10^(-8)*t3)
-plot(q1.m3.r)
+plot(q1.m3.r, main = "residual of third-order polynomial model", ylab = "residuals")
 #no big difference, not helping
 
 #fit a sinusoid
@@ -64,18 +64,21 @@ v4 = sin(2*pi*f2*t/d)
 v5 = cos(2*pi*f3*t/d)
 v6 = sin(2*pi*f3*t/d)
 q1.si = lm(q1.sq ~ v1 + v2 + v3 + v4 +v5 + v6)
-plot(t, q1.si$residuals)
-plot(q1.sq)
-points(t, q1.si.3$fitted.values, type = "l", col = "red")
+plot(q1.sq, main = "fit linear + sinusoids", ylab = "")
+lines(q1.si$fitted.values + q1.m1$fitted.values -1, type = "l", col = "blue")
+
+plot(q1.sq - (q1.si$fitted.values + q1.m1$fitted.values -1), type = "l", main = "residuals from linear + sinusoids", ylab = "residuals")
 
 #diff
 q1.df = diff(q1.sq)
-plot(q1.df)
-acf(q1.df, lag.max = 300)
+plot(q1.df, main = "Differencing once")
+acf(q1.df, main = "")
+acf(q1.df, lag.max = 300, main = "")
 #seasonal difference at d around 50
-q1.sdf = diff(q1.df1, 50)
+q1.sdf = diff(q1.df, 52)
 plot(q1.sdf)
 acf(q1.sdf, lag.max = 300)
+pacf(q1.sdf)
 
 check_diff <- function(dt,a,b) {
   for (i in a:b) {
@@ -94,7 +97,7 @@ check_diff <- function(dt,a,b) {
 acf(q1.sdf, lag.max = 300)$acf
 pacf(q1.sdf, lag.max = 300)
 #seems like ARMA(0,1) is a good choice
-#AMRA???0,1)
+#AMRA(0,1)
 q1.md01 <- arima(q1.sq, order = c(0,1,1), seasonal = list(order = c(0,1,1), period = 50))
 q1.md01 #aic = -358.58
 tsdiag(q1.md01)
@@ -109,7 +112,7 @@ q1.md02 <- arima(q1.sq, order = c(0,1,2), seasonal = list(order = c(0,1,2), peri
 q1.md02 #aic = -382.31
 tsdiag(q1.md02)
 
-#ncreasing p or q does not make model better, "next more complex" test proves ARMA(0,1) is the best
+#increasing p or q does not make model better, "next more complex" test proves ARMA(0,1) is the best
 ```
 
 ```{r}
@@ -130,28 +133,14 @@ mse <- function(v1,v2,tsd,n) {
   return(mean(test.error))
 }
 
-v10 <- c(1,0,0)
-v01 <- c(0,0,1)
-v11 <- c(1,0,1)
-v12 <- c(1,0,2)
-mse (v10,c(0,0,0),ts.2.res,length(ts.2.res))
-mse (v01,c(0,0,0),ts.2.res,length(ts.2.res))
-mse (v11,c(0,0,0),ts.2.res,length(ts.2.res))
-mse( v12, c(0,0,0), ts.2.res, length(ts.2.res))
-mse(c(1,1,1),c(0,0,0),ts.2.res,length(ts.2.res))
-mse(c(1,1,6),c(0,0,0))
-full.arima <- arima(ts.2.res, order = v11)
-
 ```
 
 ```{r}
 #6.Forecast
-predictions <- predict(, n.ahead = 104)$pred
+
 ```
 
-```{r}
-#Another model
-```
+
 
 
 
