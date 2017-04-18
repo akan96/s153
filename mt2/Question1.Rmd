@@ -1,0 +1,126 @@
+---
+title: "Question 1"
+author: "Avery Kan"
+date: "9 Apr 2017"
+output:
+  word_document: default
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(forecast)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+```{r}
+ts1 <- read.csv("q1_train.csv", as.is = TRUE)
+ts.1 <- ts(ts1[,2])
+ts1 <- sqrt(ts.1+abs(min(ts.1))+0.001)
+plot(ts1, type = 'l')
+```
+
+
+```{r}
+ts1.d <- diff(ts1)
+ts1.acf <- ts1.d %>% acf(20) 
+ts1.pacf <- ts1.d %>% pacf(20)
+ts1.acf[1]
+ts1.pacf[1]
+ts1.d.s <- ts1.d %>% diff(52)
+ts1.sacf <- ts1.d.s %>% acf(200)
+ts1.psacf <- ts1.d.s %>% pacf(200)
+ts1.sacf[52] 
+ts1.psacf[52]
+```
+Rule 1: +ac out to high lag, diff for trend
+-.136 acf and pacf lag 1: add MA
+From acf, max MA: 2
+From pacf, max AR: 3
+
+Rule 12:  strong and consistent seasonal pattern,  seasonal differencing. no more 2 order, 1 each or 2 on one.
+
+sacf, -0.405  autocorrelation of the appropriately differenced series is negative at lag s 
+spacf, -0.074 no useful inference
+
+4. ARIMA Fit
+
+```{r}
+mse <- function(v1,v2,tsd,n){
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 30))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)){
+    n1 <- n1list[i]
+    train <- tsd[1:n1]
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
+}
+```
+
+312 011
+
+```{r, eval = F}
+#testing AR parameter
+mse(c(3,1,2),c(0,1,1),ts1,length(ts1)) #2.352
+mse(c(2,1,2),c(0,1,1),ts1,length(ts1)) #2.346
+mse(c(1,1,2),c(0,1,1),ts1,length(ts1)) #2.333
+
+#testing MA 
+mse(c(1,1,1),c(0,1,1),ts1,length(ts1)) #2.331
+
+#testing SMA/SAR
+mse(c(1,1,1),c(1,1,0),ts1,length(ts1)) #2.092
+
+```
+
+
+5. Forecast
+
+```{r}
+model <- arima(ts1, order = c(1,1,1), seasonal = list(order = c(1,1,0), period = 52))
+
+predict.arima <- predict(model,n.ahead= 104)
+ts1.pred <- (predict.arima$pred)^2
+tsdiag(model)
+```
+
+
+```{r}
+plot(1:(length(ts.1) + length(ts1.pred)), c(ts.1, ts1.pred), type = 'l', col = 1,
+     main="Predictions", sub="ARIMA(1,1,1)x(1,1,0)_52", 
+  	xlab="time", ylab="ts1")
+points((length(ts.1) + 1) : (length(ts.1) + length(ts1.pred)), ts1.pred, type = 'l', col = 2)
+
+```
+
+
+
+6. Submit
+```{r}
+write.table(ts1.pred,
+            sep = ",",
+            col.names = FALSE,
+            row.names = FALSE,
+            file = "Q1_Avery_Kan_25363807.txt")
+
+```
+
+This should save the file to your local directory. As a check to make sure it works, we can read in the file and plot the points to make sure it is what we expected.
+
+```{r}
+temp <- read.table("Q1_Avery_Kan_25363807.txt", sep = ",")
+plot(as.numeric(unlist(temp)))
+```
+
+

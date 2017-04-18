@@ -1,0 +1,127 @@
+---
+title: "Question5"
+author: "Avery Kan"
+date: "9 Apr 2017"
+output:
+  word_document: default
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(forecast)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+```{r}
+ts5 <- read.csv("q5_train.csv", as.is = TRUE)
+ts5 <- ts(ts5[,2])
+```
+
+
+1. Explore
+```{r}
+plot(ts5, type = 'l')
+```
+
+
+```{r}
+acf(ts5)
+ts5.d <- diff(ts5)
+ts5.acf <- ts5.d %>% acf(20) 
+ts5.pacf <- ts5.d %>% pacf(20)
+ts5.acf[1]
+ts5.pacf[1]
+ts5.d.s <- ts5.d %>% diff(52)
+ts5.sacf <- ts5.d.s %>% acf(200)
+ts5.psacf <- ts5.d.s %>% pacf(200)
+ts5.sacf[52] 
+ts5.psacf[52]
+```
+Rule 1: +ac out to high lag, diff for trend
+-.0.44 acf and pacf lag 1: add MA
+From acf, max MA: 3
+From pacf, max AR: 2
+
+Rule 12:  strong and consistent seasonal pattern,  seasonal differencing. no more 2 order, 1 each or 2 on one.
+
+sacf(+), -0.236  autocorrelation of the appropriately differenced series is positive at lag s 
+spacf(-), -0.219
+
+
+4. ARIMA Fit
+
+```{r}
+mse <- function(v1,v2,tsd,n){
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 5))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)){
+    n1 <- n1list[i]
+    train <- tsd[1:n1]
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
+}
+```
+
+```{r, eval = F}
+#312011
+##test AR
+mse(c(3,1,2),c(0,1,1),ts5,length(ts5)) 
+#4.025
+mse(c(2,1,2),c(0,1,1),ts5,length(ts5)) 
+#4.0217
+mse(c(1,1,2),c(0,1,1),ts5,length(ts5)) 
+#4.0076
+
+##test MA
+mse(c(1,1,1),c(0,1,1),ts5,length(ts5)) 
+#3.9602
+
+
+```
+
+
+5. Forecast
+
+```{r}
+model <- arima(ts5, order = c(1,1,1), seasonal = list(order = c(0,1,1), period = 52))
+predict.arima <- predict(model,n.ahead= 104)
+ts5.pred <- predict.arima$pred
+```
+
+
+```{r, eval = F}
+plot(1:(length(ts5) + length(ts5.pred)), c(ts5, ts5.pred), type = 'l', col = 1)
+points((length(ts5) + 1) : (length(ts5) + length(ts5.pred)), ts5.pred, type = 'l', col = 2)
+```
+
+
+6. Submit
+```{r, eval = F}
+write.table(ts5.pred,
+            sep = ",",
+            col.names = FALSE,
+            row.names = FALSE,
+            file = "Q5_Avery_Kan_25363807.txt")
+
+```
+
+This should save the file to your local directory. As a check to make sure it works, we can read in the file and plot the points to make sure it is what we expected.
+
+```{r, eval = F}
+temp <- read.table("Q5_Avery_Kan_25363807.txt", sep = ",")
+plot(as.numeric(unlist(temp)))
+```
+
+

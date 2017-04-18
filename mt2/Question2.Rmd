@@ -1,0 +1,120 @@
+---
+title: "Question 2"
+author: "Avery Kan"
+date: "9 Apr 2017"
+output:
+  word_document: default
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+<!-- Don't edit in between this line and the one below -->
+```{r include=FALSE}
+# Don't delete this chunk if you are using the DataComputing package
+library(DataComputing)
+library(forecast)
+```
+*Source file* 
+```{r, results='asis', echo=FALSE}
+includeSourceDocuments()
+```
+<!-- Don't edit the material above this line -->
+```{r}
+ts2 <- read.csv("q2_train.csv", as.is = TRUE)
+ts2 <- ts(ts2[,2])
+```
+
+
+1. Explore
+```{r}
+plot(ts2, type = 'l')
+```
+
+
+```{r}
+acf(ts2)
+ts2.d <- diff(ts2)
+ts2.acf <- ts2.d %>% acf(20) 
+ts2.pacf <- ts2.d %>% pacf(20)
+ts2.acf[1]
+ts2.pacf[1]
+ts2.d.s <- ts2.d %>% diff(52)
+ts2.sacf <- ts2.d.s %>% acf(200)
+ts2.psacf <- ts2.d.s %>% pacf(200)
+ts2.sacf[52] 
+ts2.psacf[52]
+```
+Rule 1: +ac out to high lag, diff for trend
+-.283 acf and pacf lag 1: add MA
+From acf, max MA: 2
+From pacf, max AR: 2
+
+Rule 12:  strong and consistent seasonal pattern,  seasonal differencing. no more 2 order, 1 each or 2 on one.
+
+sacf, -0.393  autocorrelation of the appropriately differenced series is positive at lag s 
+spacf, -0.187
+
+
+4. ARIMA Fit
+
+```{r}
+mse <- function(v1,v2,tsd,n){
+  n1list <- round(seq(from = ceiling(n/2), to = n-1, length.out = 5))
+  test.error <- numeric(length(n1list))
+  for(i in 1:length(n1list)){
+    n1 <- n1list[i]
+    train <- tsd[1:n1]
+    test <- tsd[(n1+1):n]
+    train.arima <- arima(train, order = v1, 
+            seasonal = list(order = v2, period = 52)) 
+    test.pred <- forecast(train.arima,length(test))$mean
+    test.error[i] <- sqrt(sum((test.pred-test)^2))
+  }
+  return(mean(test.error))
+}
+```
+
+```{r, eval = F}
+mse(c(3,1,2),c(0,1,1),ts2,length(ts2)) #9.13
+mse(c(2,1,2),c(0,1,1),ts2,length(ts2)) #9.02
+mse(c(1,1,2),c(0,1,1),ts2,length(ts2)) #8.96
+mse(c(1,1,1),c(0,1,1),ts2,length(ts2)) #9.01
+
+```
+
+
+5. Forecast
+
+```{r}
+model <- arima(ts2, order = c(1,1,2), seasonal = list(order = c(0,1,1), period = 52))
+predict.arima <- predict(model,n.ahead= 104)
+ts2.pred <- predict.arima$pred
+
+```
+
+
+```{r}
+plot(1:(length(ts2) + length(ts2.pred)), c(ts2, ts2.pred), type = 'l', col = 1)
+points((length(ts2) + 1) : (length(ts2) + length(ts2.pred)), ts2.pred, type = 'l', col = 2)
+```
+
+
+
+6. Submit
+```{r}
+write.table(ts2.pred,
+            sep = ",",
+            col.names = FALSE,
+            row.names = FALSE,
+            file = "Q2_Avery_Kan_25363807.txt")
+
+```
+
+This should save the file to your local directory. As a check to make sure it works, we can read in the file and plot the points to make sure it is what we expected.
+
+```{r, eval = F}
+temp <- read.table("Q2_Avery_Kan_25363807.txt", sep = ",")
+plot(as.numeric(unlist(temp)))
+```
+
+
