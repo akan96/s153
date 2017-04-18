@@ -25,6 +25,17 @@ ts4 <- ts(ts4[,2])
 plot(ts4, type = "l")
 ```
 
+
+```{r}
+ts4.d <- diff(ts4)
+ts4.d %>% acf(20) #MA5-
+ts4.d %>% pacf(20) #AR4-
+ts4.d.s <- ts4.d %>% diff(52)
+sacf <- ts4.d.s %>% acf(200)
+ts4.d.s %>% pacf(200)
+acfs[52] #SMA1
+```
+
 What do you notice? Are any transformations needed?
 
 ```{r}
@@ -42,7 +53,7 @@ ts2.d <- diff(ts2.ln)
 acf(ts2.d, lag.max = 100)
 pacf(ts2.d, lag.max = 100)
 
-para <- c(0.5/104, rep(1/104,103),0.5/104)
+para <- c(0.5/104, rep(1/104,103),0.5/104) 
 fil <- stats::filter(ts2,para)
 plot(t, ts2, type = "l")
 points(t, fil, type = "l", col = "red")

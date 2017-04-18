@@ -91,7 +91,7 @@ mse(c(1,1,1),c(1,1,0),ts1,length(ts1)) #2.092
 model <- arima(ts1, order = c(1,1,1), seasonal = list(order = c(1,1,0), period = 52))
 
 predict.arima <- predict(model,n.ahead= 104)
-ts1.pred <- (predict.arima$pred)^2
+ts1.pred <- (predict.arima$pred)^2 - 0.001 - abs(min(ts.1))
 tsdiag(model)
 ```
 
@@ -100,7 +100,7 @@ tsdiag(model)
 plot(1:(length(ts.1) + length(ts1.pred)), c(ts.1, ts1.pred), type = 'l', col = 1,
      main="Predictions", sub="ARIMA(1,1,1)x(1,1,0)_52", 
   	xlab="time", ylab="ts1")
-points((length(ts.1) + 1) : (length(ts.1) + length(ts1.pred)), ts1.pred, type = 'l', col = 2)
+points((length(ts.1) + 1) : (length(ts1) + length(ts1.pred)), ts1.pred, type = 'l', col = 2)
 
 ```
 

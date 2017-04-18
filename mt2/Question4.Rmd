@@ -45,14 +45,14 @@ ts4.sacf[52]
 ts4.psacf[52]
 ```
 Rule 1: +ac out to high lag, diff for trend
--.35 acf and pacf lag 1: add MA
+-.446 acf and pacf lag 1: add MA
 From acf, max MA: 1
-From pacf, max AR: 1
+From pacf, max AR: 2
 
 Rule 12:  strong and consistent seasonal pattern,  seasonal differencing. no more 2 order, 1 each or 2 on one.
 
-sacf, -0.346  autocorrelation of the appropriately differenced series is positive at lag s 
-spacf, -0.265
+sacf, -0.493 autocorrelation of the appropriately differenced series is positive at lag s 
+spacf, -0.199
 
 
 4. ARIMA Fit
@@ -75,9 +75,9 @@ mse <- function(v1,v2,tsd,n){
 ```
 
 ```{r, eval = F}
-mse(c(1,1,2),c(0,1,1),ts4,length(ts4)) #4.007
-mse(c(2,1,1),c(0,1,1),ts4,length(ts4)) #4.02
-mse(c(1,1,1),c(0,1,1),ts4,length(ts4)) #3.96
+mse(c(2,1,1),c(0,1,1),ts4,length(ts4)) #6.58
+mse(c(1,1,1),c(0,1,1),ts4,length(ts4)) #6.74
+mse(c(1,1,1),c(1,1,0),ts4,length(ts4)) #error
 
 ```
 
@@ -85,32 +85,22 @@ mse(c(1,1,1),c(0,1,1),ts4,length(ts4)) #3.96
 5. Forecast
 
 ```{r}
-#model <- arima(ts4, order = c(4,1,2), seasonal = list(order = c(0,1,1), period = 52))
-
-#predict.arima <- predict(model,n.ahead= 106)
-#ts4.pred <- predict.arima$pred
-
-model2 <- arima(ts4, order = c(3,1,4), seasonal = list(order = c(0,1,1), period = 52))
-
-predict.arima2 <- predict(model2,n.ahead= 104)
-ts4.pred2 <- predict.arima2$pred
-
-
+model <- arima(ts4, order = c(1,1,1), seasonal = list(order = c(0,1,1), period = 52))
+predict.arima <- predict(model,n.ahead= 104)
+ts4.pred <- predict.arima$pred
 ```
 
 
 ```{r, eval = F}
-
-
-plot(1:(length(ts4) + length(ts4.pred2)), c(ts4, ts4.pred2), type = 'l', col = 1)
-points((length(ts4) + 1) : (length(ts4) + length(ts4.pred2)), ts4.pred2, type = 'l', col = 2)
+plot(1:(length(ts4) + length(ts4.pred)), c(ts4, ts4.pred), type = 'l', col = 1)
+points((length(ts4) + 1) : (length(ts4) + length(ts4.pred)), ts4.pred, type = 'l', col = 2)
 ```
 
 
 
 6. Submit
 ```{r, eval = F}
-write.table(ts4.pred2,
+write.table(ts4.pred,
             sep = ",",
             col.names = FALSE,
             row.names = FALSE,
@@ -121,7 +111,7 @@ write.table(ts4.pred2,
 This should save the file to your local directory. As a check to make sure it works, we can read in the file and plot the points to make sure it is what we expected.
 
 ```{r, eval = F}
-temp <- read.table("Example_Firstname_Lastname_StudentIDNumber.txt", sep = ",")
+temp <- read.table("Q4_Avery_Kan_25363807.txt", sep = ",")
 plot(as.numeric(unlist(temp)))
 ```
 
